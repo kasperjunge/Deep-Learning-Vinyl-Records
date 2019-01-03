@@ -11,6 +11,7 @@ import time
 import os
 import copy
 import pandas as pd
+import inspect
 from pandas_ml import ConfusionMatrix
 import pickle
 
@@ -22,7 +23,7 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, device, dat
     best_acc = 0.0
 
     # FOR PLOTTING LEARNING CURVE
-    epoch_axis = [0,1,2]#,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]
+    epoch_axis = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]
     log_train_loss = []
     log_train_acc = []
     log_val_loss = []
@@ -54,21 +55,20 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, device, dat
 
             # Iterate over data.
             for inputs, labels in dataloaders[phase]:
-                            
                 inputs = inputs.to(device)
                 labels = labels.to(device)
-
-
+                
                 # zero the parameter gradients
                 optimizer.zero_grad()
 
-                
+
                 # forward
                 # track history if only in train
                 with torch.set_grad_enabled(phase == 'train'):
                     outputs = model(inputs)
                     _, preds = torch.max(outputs, 1)
-                    loss = criterion(outputs, labels) #BREAKS HERE
+                    loss = criterion(outputs, labels)
+                    #loss = criterion(preds, labels) # For MSELoss()
 
                     #print(outputs)
                     #print(preds)
@@ -81,10 +81,10 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, device, dat
                 #print(preds.cpu().numpy()[0])
                 #print(preds.cpu().numpy()[1])
                 # PREPARE CONF. MATRIX
-                for x in labels:
+                for x in range(len(labels)):
                     labels_temp.append(labels.cpu().numpy()[x])
 
-                for x in preds:
+                for x in range(len(preds)):
                     preds_temp.append(preds.cpu().numpy()[x])
 
 
@@ -139,10 +139,10 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, device, dat
     })
     
     # multiple line plot
-    plt.plot( 'epoch_axis', 'val_acc', data=df, marker='' , color='blue', linewidth=4)
-    plt.plot( 'epoch_axis', 'val_loss', data=df, marker='', color='red', linewidth=4)
-    plt.plot( 'epoch_axis', 'train_acc', data=df, marker='' , color='blue', linewidth=2, linestyle='dashed')
-    plt.plot( 'epoch_axis', 'train_loss', data=df, marker='', color='red', linewidth=2, linestyle='dashed')
+    plt.plot( 'epoch_axis', 'val_acc', data=df, marker='' , color='blue', linewidth=1)
+    plt.plot( 'epoch_axis', 'val_loss', data=df, marker='', color='red', linewidth=1)
+    plt.plot( 'epoch_axis', 'train_acc', data=df, marker='' , color='blue', linewidth=1, linestyle='dashed')
+    plt.plot( 'epoch_axis', 'train_loss', data=df, marker='', color='red', linewidth=1, linestyle='dashed')
     plt.legend(('Val. Acc.', 'Val. Loss', 'Train Acc.', 'Train Loss'))
 
 
